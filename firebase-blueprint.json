@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "DailyExpense": {
+      "title": "Daily Expense",
+      "description": "A record of expenses for a specific day",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "The date of the expense" },
+        "dayTotal": { "type": "number", "description": "Total expense for the day" },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "total": { "type": "number" },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": { "type": "string" },
+                    "amount": { "type": "number" }
+                  },
+                  "required": ["description", "amount"]
+                }
+              }
+            },
+            "required": ["name", "total", "items"]
+          }
+        },
+        "uid": { "type": "string", "description": "User ID of the owner" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "dayTotal", "entries", "uid", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/expenses/{expenseId}": {
+      "schema": "DailyExpense",
+      "description": "Collection of daily expense records"
+    }
+  }
+}

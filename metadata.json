@@ -1,0 +1,5 @@
+{
+  "name": "Chinese Handwritten Expense Parser",
+  "description": "Extracts and tabulates expenses from handwritten traditional Chinese ledger images using Gemini AI.",
+  "requestFramePermissions": []
+}
