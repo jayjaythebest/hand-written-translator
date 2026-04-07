@@ -6,7 +6,7 @@ import {
 import { db } from '../firebase';
 import { Project, ProjectImage, ProjectRecord, DailyExpense, EntryRecord, ExpenseItem } from '../types';
 import { getSessionId } from '../lib/session';
-import { compressImage, computeImageHash } from '../lib/imageUtils';
+import { compressImage, computeImageHash, normalizeToJpeg } from '../lib/imageUtils';
 import { exportProjectToExcel, exportDayToExcel } from '../lib/excelExport';
 import { parseExpenseImage } from '../services/geminiService';
 import { useDropzone } from 'react-dropzone';
@@ -122,16 +122,17 @@ export default function ProjectDetail({ project, onBack }: Props) {
   // ── Upload handler (parallel) ────────────────────────────────────────
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      // Step 1: read all files in parallel
+      // Step 1: normalise (HEIC→JPEG) then read all files in parallel
       const fileDataList = await Promise.all(
         acceptedFiles.map(async (file) => {
+          const normalized = await normalizeToJpeg(file);
           const rawDataUrl = await new Promise<string>((res, rej) => {
             const reader = new FileReader();
             reader.onload = () => res(reader.result as string);
-            reader.onerror = () => rej(new Error(`無法讀取 ${file.name}`));
-            reader.readAsDataURL(file);
+            reader.onerror = () => rej(new Error(`無法讀取 ${normalized.name}`));
+            reader.readAsDataURL(normalized);
           });
-          return { file, rawDataUrl, hash: computeImageHash(rawDataUrl) };
+          return { file: normalized, rawDataUrl, hash: computeImageHash(rawDataUrl) };
         }),
       );
 
