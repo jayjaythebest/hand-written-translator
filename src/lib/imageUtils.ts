@@ -8,10 +8,14 @@ export async function normalizeToJpeg(file: File): Promise<File> {
     /\.(heic|heif)$/i.test(file.name);
   if (!isHeic) return file;
 
-  const result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
-  const blob = Array.isArray(result) ? result[0] : result;
-  const jpegName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-  return new File([blob], jpegName, { type: 'image/jpeg' });
+  try {
+    const result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+    const blob = Array.isArray(result) ? result[0] : result;
+    const jpegName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+    return new File([blob], jpegName, { type: 'image/jpeg' });
+  } catch (err: any) {
+    throw new Error(`HEIC 轉換失敗（${file.name}）：${err?.message ?? '未知錯誤'}`);
+  }
 }
 
 /** Resize and compress an image dataUrl to keep it under Firestore's 1MB doc limit. */

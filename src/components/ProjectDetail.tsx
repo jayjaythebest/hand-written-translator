@@ -171,7 +171,13 @@ export default function ProjectDetail({ project, onBack }: Props) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'image/*': [] },
+    // 'image/*' alone won't match HEIC on Windows (file.type is empty there),
+    // so explicitly list the HEIC/HEIF extensions as a fallback.
+    accept: {
+      'image/*': [],
+      'image/heic': ['.heic'],
+      'image/heif': ['.heif'],
+    },
     multiple: true,
   } as any);
 
