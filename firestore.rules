@@ -1,40 +1,29 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    // Collection: expenses
-    // Fields:
-    //   - date: string (required)
-    //   - dayTotal: number (required)
-    //   - entries: list (required)
-    //   - uid: string (required, immutable)
-    //   - createdAt: timestamp (required, immutable)
-    // ===============================================================
 
-    // Helper Functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function isValidExpense(data) {
-      return data.date is string &&
-             data.dayTotal is number &&
-             data.entries is list &&
-             data.uid is string &&
-             data.createdAt is timestamp;
-    }
-
-    match /expenses/{expenseId} {
-      allow read: if true;
-      allow create: if isValidExpense(request.resource.data);
+    // Projects
+    match /projects/{projectId} {
+      allow read, create, delete: if true;
       allow update: if false;
-      allow delete: if true;
+    }
+
+    // Project images (contains compressed base64 + status)
+    match /projectImages/{imageId} {
+      allow read, create, delete: if true;
+      allow update: if true; // needed for status transitions by the pipeline
+    }
+
+    // Project records (extracted data, editable by user)
+    match /projectRecords/{recordId} {
+      allow read, create, delete: if true;
+      allow update: if true; // needed for inline editing
+    }
+
+    // Legacy expenses collection (kept for backward compatibility)
+    match /expenses/{expenseId} {
+      allow read, create, delete: if true;
+      allow update: if false;
     }
   }
 }
